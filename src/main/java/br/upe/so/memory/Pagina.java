@@ -9,13 +9,13 @@ public class Pagina{
   private long lastUsed;
 
   public int getNumeroFrame() { return numeroFrame; }
-  public void getNumeroFrame(int numeroFrame){ this.numeroFrame = numeroFrame; }
+  public void setNumeroFrame(int numeroFrame){ this.numeroFrame = numeroFrame; }
 
   public boolean getPresente() { return presente; }
   public void setPresente(boolean presente){ this.presente = presente; }
 
   public boolean getReferenciado(){ return referenciado; }
-  public boolean setReferenciado(boolean referenciado){ 
+  public void setReferenciado(boolean referenciado){ 
    this.referenciado = referenciado;
   }
 
@@ -25,6 +25,6 @@ public class Pagina{
   }
 
   public long getLastUsed(){ return lastUsed; }
-  public void getLastUsed(long lastUsed){ this.lastUsed = lastUsed;}
+  public void setLastUsed(long lastUsed){ this.lastUsed = lastUsed;}
 }
 

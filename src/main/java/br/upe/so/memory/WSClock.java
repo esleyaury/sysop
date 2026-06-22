@@ -9,7 +9,7 @@ public class WSClock{
     this.tau = tau;
   }
 
-  public nextPont(PhysicalMemory pm) {
+  public void nextPont(PhysicalMemory pm) {
     this.pontRelogio = (this.pontRelogio + 1) % pm.getTamanho();
   }
 
