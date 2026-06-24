@@ -2,11 +2,11 @@ package br.upe.so.memory;
 
 public class VirtualMemory{
   private Pagina[] tabela;
-  private int tamanho;
+  private int tamanhoVirtual;
 
-  public VirtualMemory(){
-    this.tamanho = 10;
-    this.tabela = new Pagina[this.tamanho];
+  public VirtualMemory(int tamanhoVirtual){
+    this.tamanhoVirtual = tamanhoVirtual;
+    this.tabela = new Pagina[this.tamanhoVirtual];
   }
 
   public Pagina getPagina(int endereco){ return this.tabela[endereco]; }

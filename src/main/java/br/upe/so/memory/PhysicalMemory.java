@@ -2,28 +2,42 @@ package br.upe.so.memory;
 
 public class PhysicalMemory{
 
-  private int[] frames;
-  private int[] paginaOcupante;
-  private int tamanho;
+  private int[] frames; //Conteudo sendo "Rodado"
+  private int[] paginaOcupante; //A pagina a qual tal conteudo pertence.
+  private int tamanhoFisico;
 
-  public PhysicalMemory(){
-    this.tamanho = 5;
-    this.frames = new int[this.tamanho];
-    this.paginaOcupante = new int[this.tamanho];
+  public PhysicalMemory(int tamanhoFisico){
+    this.tamanhoFisico = tamanhoFisico;
+    this.frames = new int[this.tamanhoFisico];
+    this.paginaOcupante = new int[this.tamanhoFisico];
     java.util.Arrays.fill(paginaOcupante, -1);
+    // precisa saber como verificar se o frames esta com espaco livre
   }
 
-  public int ler(int frame){
+  public int read(int frame){
     return this.frames[frame];
   }
 
-  public int escrever(int frame, int valor){
+  public void write(int frame, int valor){
     this.frames[frame] = valor;
   }
 
   //Precisa ainda checar se o frame ta vazio.
+  public boolean hasEmptyFrame(){
+    for (int p : paginaOcupante){
+      if (p == -1) return true;
+    }
+    return false;
+  }
 
-  // mapeamento inverso
+  public int proximoFrameLivre(){
+    for (int i = 0; i < tamanhoFisico; i++){
+      if (paginaOcupante[i] == -1) return i;
+    }
+    return -1;
+  }
+
+  // mapeamento inverso, pro WSClock saber, qual pagina retirar
 
   public int getPaginaOcupante(int frame){
     return paginaOcupante[frame];
@@ -37,7 +51,7 @@ public class PhysicalMemory{
     paginaOcupante[frame] = -1;
   }
 
-  public int getTamanho(){
-    return this.tamanho;
+  public int getTamanhoFisico(){
+    return this.tamanhoFisico;
   }
 }
