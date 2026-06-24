@@ -42,6 +42,9 @@ public class VirtualMemorySystem implements VirtualMemoryManager{
       physicalMem.write(p.getNumeroFrame(), valor);
       p.setModificado(true);
       p.setReferenciado(true);
+    } else {
+      handlePageFault(enderecoVirtual);
+      write(enderecoVirtual, valor);
     }
   }
   private int handlePageFault(int enderecoVirtual){
@@ -56,7 +59,7 @@ public class VirtualMemorySystem implements VirtualMemoryManager{
         virtualMem, physicalMem, System.currentTimeMillis());
 
       int paginaVitima = physicalMem.getPaginaOcupante(frameVitima);
-      Pagina vitima = virtualMem.getPagina(enderecoVirtual);
+      Pagina vitima = virtualMem.getPagina(paginaVitima);
 
       if(vitima.getModificado()){
         disco.savePage(paginaVitima, physicalMem.read(frameVitima));
