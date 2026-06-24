@@ -1,4 +1,6 @@
 package br.upe.so.memory;
+import br.upe.so.process.LogSO;
+
 import br.upe.so.kernel.VirtualMemoryManager;
 
 public class VirtualMemorySystem implements VirtualMemoryManager{
@@ -29,45 +31,54 @@ public class VirtualMemorySystem implements VirtualMemoryManager{
   public int read(int enderecoVirtual){
     Pagina p = virtualMem.getPagina(enderecoVirtual);
     if (p.getPresente()){
+      LogSO.imprimirLog("Endereço: "+enderecoVirtual+" presente --> Frame: "+ p.getNumeroFrame());
       return physicalMem.read(p.getNumeroFrame());
     }
-
+    LogSO.imprimirLog("PAGE FAULT no endereço: " + enderecoVirtual);
     return handlePageFault(enderecoVirtual);
   }
 
   @Override
   public void write(int enderecoVirtual, int valor){
     Pagina p = virtualMem.getPagina(enderecoVirtual);
-    if (p.getPresente()){
-      physicalMem.write(p.getNumeroFrame(), valor);
-      p.setModificado(true);
-      p.setReferenciado(true);
-     
-     
-     
-      write(enderecoVirtual, valor);
+    if (!p.getPresente()){
+      LogSO.imprimirLog("PAGE FAULT no endereço: "+enderecoVirtual+" durante escrita");
+      handlePageFault(enderecoVirtual);
+      p = virtualMem.getPagina(enderecoVirtual);
     }
-  }
+    physicalMem.write(p.getNumeroFrame(), valor);
+    p.setModificado(true);
+    p.setReferenciado(true);
+    p.setLastUsed(System.currentTimeMillis());
+    LogSO.imprimirLog("Escrita no endereço: "+enderecoVirtual+" --> Frame: "+ p.getNumeroFrame()+"Valor: "+ valor);
+    }
+
   private int handlePageFault(int enderecoVirtual){
     int valor = disco.loadPage(enderecoVirtual);
+    LogSO.imprimirLog("Página "+enderecoVirtual+" carregada do disco");
 
     if (physicalMem.hasEmptyFrame()){
       int frame = physicalMem.proximoFrameLivre();
+      LogSO.imprimirLog("Frame livre encontrado --> Frame: "+frame);
       ocuparFrame(frame, enderecoVirtual, valor);
     } else {
-
+      LogSO.imprimirLog("Memória cheia --> acionando WSClock");
       int frameVitima = wsclock.selecionarVitima(
         virtualMem, physicalMem, System.currentTimeMillis());
 
       int paginaVitima = physicalMem.getPaginaOcupante(frameVitima);
-      Pagina vitima = virtualMem.getPagina(enderecoVirtual);
+      Pagina vitima = virtualMem.getPagina(paginaVitima);
 
       if(vitima.getModificado()){
         disco.savePage(paginaVitima, physicalMem.read(frameVitima));
+        LogSO.imprimirLog("Página: "+paginaVitima+" estava modificada -- > salva no disco");
+      }else{
+        LogSO.imprimirLog("Página: "+paginaVitima+" não modificada → descartada");
       }
 
       vitima.setPresente(false);
       physicalMem.liberar(frameVitima);
+      LogSO.imprimirLog("Página: "+paginaVitima+" Removida do frame: "+frameVitima);
 
       ocuparFrame(frameVitima, enderecoVirtual, valor);
     }
@@ -84,5 +95,6 @@ public class VirtualMemorySystem implements VirtualMemoryManager{
     p.setNumeroFrame(frame);
     p.setLastUsed(System.currentTimeMillis());
     p.setReferenciado(true);
+    LogSO.imprimirLog("Página: "+paginaVirtual+" Ocupando frame: "+frame);
   }
 }
