@@ -42,10 +42,6 @@ public class VirtualMemorySystem implements VirtualMemoryManager{
       physicalMem.write(p.getNumeroFrame(), valor);
       p.setModificado(true);
       p.setReferenciado(true);
-     
-     
-     
-      write(enderecoVirtual, valor);
     }
   }
   private int handlePageFault(int enderecoVirtual){
