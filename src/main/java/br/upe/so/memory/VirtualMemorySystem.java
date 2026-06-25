@@ -18,12 +18,13 @@ public class VirtualMemorySystem implements VirtualMemoryManager{
   private AtomicInteger totalPageFaults = new AtomicInteger(0);
 
   public VirtualMemorySystem(int VMSIZE){
+    this.VMSIZE = VMSIZE;
+    this.PMSIZE = VMSIZE/2;
     this.virtualMem = new VirtualMemory(VMSIZE);
     this.physicalMem = new PhysicalMemory(PMSIZE);
     this.disco = new Disk(VMSIZE, gerarDadosPrograma());
     this.wsclock = new WSClock(TAU);
-    this.VMSIZE = VMSIZE;
-    this.PMSIZE = VMSIZE/2;
+    
     startTable();
     LogSO.imprimirLog("VirtualMemorySystem inicializado com dados aleatórios");
   }
