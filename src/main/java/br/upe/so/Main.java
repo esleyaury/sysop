@@ -32,7 +32,7 @@ public class Main {
         System.out.println("Thread 2: " + operacoes2.length + " operações");
 
         System.out.println("\n[PASSO 3] Inicializando sistema de memória...");
-        VirtualMemorySystem vmSystem = new VirtualMemorySystem();
+        VirtualMemorySystem vmSystem = new VirtualMemorySystem(VM_SIZE);
         Mmu mmu = new Mmu(vmSystem);
 
         System.out.println("\n[PASSO 4] Criando threads de processo...");
