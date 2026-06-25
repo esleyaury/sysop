@@ -4,17 +4,19 @@ import br.upe.so.kernel.Mmu;
 import br.upe.so.memory.VirtualMemorySystem;
 import br.upe.so.process.Operations;
 import br.upe.so.process.ProcessThread;
+import br.upe.so.process.LogSO;
 
 public class Main {
 
     private static final int VM_SIZE = 20; // precisa bater com VirtualMemorySystem.VMSIZE
 
     public static void main(String[] args) {
-        System.out.println("=".repeat(70));
-        System.out.println("  SIMULADOR DE MEMÓRIA VIRTUAL - WSClock");
-        System.out.println("=".repeat(70));
+       
+        //  SIMULADOR DE MEMÓRIA VIRTUAL - WSClock
+       
 
-        System.out.println("\n[PASSO 1] Gerando sequências de operações...");
+
+        // [PASSO 1] Gerando sequências de operações...
         FabricaDeEntradas fabrica = new FabricaDeEntradas(VM_SIZE);
         String operacoes1String = fabrica.getNewEntrada();
         String operacoes2String = fabrica.getNewEntrada();
@@ -24,23 +26,25 @@ public class Main {
         System.out.println("\n--- Thread 2 ---");
         System.out.println(operacoes2String);
 
-        System.out.println("\n[PASSO 2] Parseando operações...");
+        // [PASSO 2] Parseando operações...''
         Operations[] operacoes1 = parseOperacoes(operacoes1String);
         Operations[] operacoes2 = parseOperacoes(operacoes2String);
+
 
         System.out.println("Thread 1: " + operacoes1.length + " operações");
         System.out.println("Thread 2: " + operacoes2.length + " operações");
 
-        System.out.println("\n[PASSO 3] Inicializando sistema de memória...");
+        // [PASSO 3] Inicializando sistema de memória...
         VirtualMemorySystem vmSystem = new VirtualMemorySystem(VM_SIZE);
         Mmu mmu = new Mmu(vmSystem);
 
-        System.out.println("\n[PASSO 4] Criando threads de processo...");
+        // [PASSO 4] Criando threads de processo...
         ProcessThread thread1 = new ProcessThread(1, operacoes1, mmu);
         ProcessThread thread2 = new ProcessThread(2, operacoes2, mmu);
 
-        System.out.println("\n[PASSO 5] Iniciando execução...");
+        // [PASSO 5] Iniciando execução...
         System.out.println("=".repeat(70));
+        
 
         long tempoInicio = System.currentTimeMillis();
 
@@ -54,6 +58,7 @@ public class Main {
             System.err.println("Erro ao aguardar threads: " + e.getMessage());
         }
 
+        LogSO.fechar();
         long tempoFinal = System.currentTimeMillis();
 
         System.out.println("=".repeat(70));
