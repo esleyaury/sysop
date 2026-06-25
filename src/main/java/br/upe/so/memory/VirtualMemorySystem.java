@@ -13,13 +13,38 @@ public class VirtualMemorySystem implements VirtualMemoryManager{
   private final static int PMSIZE = VMSIZE / 2;
   private final static long TAU = 1000000;
 
-  // Construtor
+  // Construtor simples - gera dados aleatoriamente
+  public VirtualMemorySystem(){
+    this.virtualMem = new VirtualMemory(VMSIZE);
+    this.physicalMem = new PhysicalMemory(PMSIZE);
+    this.disco = new Disk(VMSIZE, gerarDadosPrograma());
+    this.wsclock = new WSClock(TAU);
+    startTable();
+    LogSO.imprimirLog("VirtualMemorySystem inicializado com dados aleatórios");
+  }
+
+  // Construtor com dados passados (opcional, mantém compatibilidade)
   public VirtualMemorySystem(int[] dadosPrograma){
     this.virtualMem = new VirtualMemory(VMSIZE);
     this.physicalMem = new PhysicalMemory(PMSIZE);
     this.disco = new Disk(VMSIZE, dadosPrograma);
     this.wsclock = new WSClock(TAU);
     startTable();
+    LogSO.imprimirLog("VirtualMemorySystem inicializado com dados fornecidos");
+  }
+
+  // Gera um array de dados aleatórios para o disco
+  private int[] gerarDadosPrograma() {
+    int[] dados = new int[VMSIZE];
+    java.util.Random r = new java.util.Random();
+    LogSO.imprimirLog("Dados iniciais do programa:");
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < VMSIZE; i++) {
+      dados[i] = r.nextInt(100);
+      sb.append(dados[i]).append(", ");
+    }
+    LogSO.imprimirLog(sb.toString());
+    return dados;
   }
 
   public void startTable(){
@@ -50,7 +75,7 @@ public class VirtualMemorySystem implements VirtualMemoryManager{
     p.setModificado(true);
     p.setReferenciado(true);
     p.setLastUsed(System.currentTimeMillis());
-    LogSO.imprimirLog("Escrita no endereço: "+enderecoVirtual+" --> Frame: "+ p.getNumeroFrame()+"Valor: "+ valor);
+    LogSO.imprimirLog("Escrita no endereço: "+enderecoVirtual+" --> Frame: "+ p.getNumeroFrame()+" Valor: "+ valor);
     }
 
   private int handlePageFault(int enderecoVirtual){
