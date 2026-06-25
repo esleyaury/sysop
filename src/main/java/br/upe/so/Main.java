@@ -9,7 +9,7 @@ import br.upe.so.process.ProcessThread;
 public class Main {
     
     // Constantes
-    private static final int VM_SIZE = 20;
+    private static final int VM_SIZE = 10;
     
     public static void main(String[] args) {
         System.out.println("=".repeat(70));
@@ -37,7 +37,7 @@ public class Main {
         
         // PASSO 3: Criar o sistema de memória virtual
         System.out.println("\n[PASSO 3] Inicializando sistema de memória...");
-        VirtualMemorySystem vmSystem = new VirtualMemorySystem();
+        VirtualMemorySystem vmSystem = new VirtualMemorySystem(VM_SIZE);
         Mmu mmu = new Mmu(vmSystem);
         
         // PASSO 4: Criar as threads

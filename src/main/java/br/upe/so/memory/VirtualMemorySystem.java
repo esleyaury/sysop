@@ -9,12 +9,15 @@ public class VirtualMemorySystem implements VirtualMemoryManager{
   private PhysicalMemory physicalMem;
   private Disk disco;
   private WSClock wsclock;
-  private final static int VMSIZE = 20;
-  private final static int PMSIZE = VMSIZE / 2;
-  private final static long TAU = 1000000;
+  private final static long TAU = 10;
+  private int VMSIZE;
+  private int PMSIZE;
+ 
 
   // Construtor simples - gera dados aleatoriamente
-  public VirtualMemorySystem(){
+  public VirtualMemorySystem(int VMSIZE){
+    this.VMSIZE = VMSIZE;
+    PMSIZE = VMSIZE / 2;
     this.virtualMem = new VirtualMemory(VMSIZE);
     this.physicalMem = new PhysicalMemory(PMSIZE);
     this.disco = new Disk(VMSIZE, gerarDadosPrograma());
