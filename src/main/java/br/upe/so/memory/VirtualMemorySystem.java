@@ -28,15 +28,6 @@ public class VirtualMemorySystem implements VirtualMemoryManager{
     LogSO.imprimirLog("VirtualMemorySystem inicializado com dados aleatórios");
   }
 
-  public VirtualMemorySystem(int[] dadosPrograma){
-    this.virtualMem = new VirtualMemory(VMSIZE);
-    this.physicalMem = new PhysicalMemory(PMSIZE);
-    this.disco = new Disk(VMSIZE, dadosPrograma);
-    this.wsclock = new WSClock(TAU);
-    startTable();
-    LogSO.imprimirLog("VirtualMemorySystem inicializado com dados fornecidos");
-  }
-
   private int[] gerarDadosPrograma() {
     int[] dados = new int[VMSIZE];
     java.util.Random r = new java.util.Random();
