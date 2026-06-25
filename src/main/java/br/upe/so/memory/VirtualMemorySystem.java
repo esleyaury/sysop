@@ -1,7 +1,8 @@
 package br.upe.so.memory;
-import br.upe.so.process.LogSO;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import br.upe.so.kernel.VirtualMemoryManager;
+import br.upe.so.process.LogSO;
 
 public class VirtualMemorySystem implements VirtualMemoryManager{
 
@@ -9,15 +10,14 @@ public class VirtualMemorySystem implements VirtualMemoryManager{
   private PhysicalMemory physicalMem;
   private Disk disco;
   private WSClock wsclock;
-  private final static long TAU = 10;
-  private int VMSIZE;
-  private int PMSIZE;
- 
+  private final static int VMSIZE = 20;
+  private final static int PMSIZE = VMSIZE / 2;
+  private final static long TAU = 5000;
 
-  // Construtor simples - gera dados aleatoriamente
-  public VirtualMemorySystem(int VMSIZE){
-    this.VMSIZE = VMSIZE;
-    PMSIZE = VMSIZE / 2;
+  // Contador real de page faults - thread-safe
+  private AtomicInteger totalPageFaults = new AtomicInteger(0);
+
+  public VirtualMemorySystem(){
     this.virtualMem = new VirtualMemory(VMSIZE);
     this.physicalMem = new PhysicalMemory(PMSIZE);
     this.disco = new Disk(VMSIZE, gerarDadosPrograma());
@@ -26,7 +26,6 @@ public class VirtualMemorySystem implements VirtualMemoryManager{
     LogSO.imprimirLog("VirtualMemorySystem inicializado com dados aleatórios");
   }
 
-  // Construtor com dados passados (opcional, mantém compatibilidade)
   public VirtualMemorySystem(int[] dadosPrograma){
     this.virtualMem = new VirtualMemory(VMSIZE);
     this.physicalMem = new PhysicalMemory(PMSIZE);
@@ -36,17 +35,15 @@ public class VirtualMemorySystem implements VirtualMemoryManager{
     LogSO.imprimirLog("VirtualMemorySystem inicializado com dados fornecidos");
   }
 
-  // Gera um array de dados aleatórios para o disco
   private int[] gerarDadosPrograma() {
     int[] dados = new int[VMSIZE];
     java.util.Random r = new java.util.Random();
-    LogSO.imprimirLog("Dados iniciais do programa:");
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < VMSIZE; i++) {
       dados[i] = r.nextInt(100);
       sb.append(dados[i]).append(", ");
     }
-    LogSO.imprimirLog(sb.toString());
+    LogSO.imprimirLog("Dados iniciais do programa: " + sb.toString());
     return dados;
   }
 
@@ -55,8 +52,10 @@ public class VirtualMemorySystem implements VirtualMemoryManager{
       this.virtualMem.setPagina(i, new Pagina());
     }
   }
+
+  // SINCRONIZADO: garante que só uma thread executa read() por vez
   @Override
-  public int read(int enderecoVirtual){
+  public synchronized int read(int enderecoVirtual){
     Pagina p = virtualMem.getPagina(enderecoVirtual);
     if (p.getPresente()){
       LogSO.imprimirLog("Endereço: "+enderecoVirtual+" presente --> Frame: "+ p.getNumeroFrame());
@@ -66,8 +65,9 @@ public class VirtualMemorySystem implements VirtualMemoryManager{
     return handlePageFault(enderecoVirtual);
   }
 
+  // SINCRONIZADO: garante que só uma thread executa write() por vez
   @Override
-  public void write(int enderecoVirtual, int valor){
+  public synchronized void write(int enderecoVirtual, int valor){
     Pagina p = virtualMem.getPagina(enderecoVirtual);
     if (!p.getPresente()){
       LogSO.imprimirLog("PAGE FAULT no endereço: "+enderecoVirtual+" durante escrita");
@@ -79,9 +79,14 @@ public class VirtualMemorySystem implements VirtualMemoryManager{
     p.setReferenciado(true);
     p.setLastUsed(System.currentTimeMillis());
     LogSO.imprimirLog("Escrita no endereço: "+enderecoVirtual+" --> Frame: "+ p.getNumeroFrame()+" Valor: "+ valor);
-    }
+  }
 
+  // Não precisa de synchronized aqui - só é chamado de dentro de read()/write(),
+  // que já estão sincronizados. Métodos privados chamados só por métodos
+  // synchronized da mesma instância já estão protegidos.
   private int handlePageFault(int enderecoVirtual){
+    totalPageFaults.incrementAndGet(); // CONTADOR REAL - incrementa aqui, no lugar certo
+
     int valor = disco.loadPage(enderecoVirtual);
     LogSO.imprimirLog("Página "+enderecoVirtual+" carregada do disco");
 
@@ -111,7 +116,6 @@ public class VirtualMemorySystem implements VirtualMemoryManager{
       ocuparFrame(frameVitima, enderecoVirtual, valor);
     }
     return valor;
-
   }
 
   private void ocuparFrame(int frame, int paginaVirtual, int valor){
@@ -124,5 +128,10 @@ public class VirtualMemorySystem implements VirtualMemoryManager{
     p.setLastUsed(System.currentTimeMillis());
     p.setReferenciado(true);
     LogSO.imprimirLog("Página: "+paginaVirtual+" Ocupando frame: "+frame);
+  }
+
+  // Novo getter: pega o total real de page faults, de forma thread-safe
+  public int getTotalPageFaults(){
+    return totalPageFaults.get();
   }
 }
