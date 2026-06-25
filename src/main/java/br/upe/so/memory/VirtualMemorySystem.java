@@ -10,18 +10,20 @@ public class VirtualMemorySystem implements VirtualMemoryManager{
   private PhysicalMemory physicalMem;
   private Disk disco;
   private WSClock wsclock;
-  private final static int VMSIZE = 20;
-  private final static int PMSIZE = VMSIZE / 2;
+  private int VMSIZE;
+  private int PMSIZE; 
   private final static long TAU = 5000;
 
   // Contador real de page faults - thread-safe
   private AtomicInteger totalPageFaults = new AtomicInteger(0);
 
-  public VirtualMemorySystem(){
+  public VirtualMemorySystem(int VMSIZE){
     this.virtualMem = new VirtualMemory(VMSIZE);
     this.physicalMem = new PhysicalMemory(PMSIZE);
     this.disco = new Disk(VMSIZE, gerarDadosPrograma());
     this.wsclock = new WSClock(TAU);
+    this.VMSIZE = VMSIZE;
+    this.PMSIZE = VMSIZE/2;
     startTable();
     LogSO.imprimirLog("VirtualMemorySystem inicializado com dados aleatórios");
   }
